@@ -1,8 +1,11 @@
+#include "Dependencies\freeglut\freeglut.h"
+#include <iostream>
+
 #pragma once
 class ComputeMain
 {
 public:
-	ComputeMain();
+	ComputeMain(int argc, char **argv);
 	~ComputeMain();
 };
 

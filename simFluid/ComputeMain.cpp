@@ -16,21 +16,18 @@ ComputeMain::ComputeMain(int argc, char **argv)
 	glutInitWindowSize(800, 600);
 	glutCreateWindow("simFluid");
 
+	// Output the currently used video card
 	cout << glGetString(GL_VENDOR) << endl;
 	cout << glGetString(GL_RENDERER) << endl;
 	
+	// Initialize GLEW and check the supported OpenGL version to run Compute Shader
 	glewInit();
 	if (glewIsSupported("GL_VERSION_4_3"))
-	{
 		cout << "GL version is supported.\n";
-	}
 	else
-	{
 		cout << "GL version is not supported. Compute shader requires the minimum of OpenGL version 4.3. \n";
-	}
 
 	glEnable(GL_DEPTH_TEST);
-
 	glutDisplayFunc(update);
 
 	// Main loop to keep the window running
@@ -44,6 +41,7 @@ ComputeMain::~ComputeMain()
 
 void ComputeMain::update(void)
 {
+	// Clears the buffer and paint the background black
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0);
 
@@ -51,7 +49,7 @@ void ComputeMain::update(void)
 }
 
 int main(int argc, char **argv) {
-	// Initialize
+	// Initialize ComputeMain
 	ComputeMain computeMain(argc, argv);
 
 	return 0;

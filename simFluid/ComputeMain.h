@@ -5,8 +5,11 @@
 // Include the particle system class
 #include "ParticleSystem.h"
 
-// Include dependency for I/O
+// Include headers
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
 
 /*
 	Class		: ComputeMain
@@ -23,5 +26,10 @@ public:
 
 	// Methods
 	static void update();
+	void initRendering();
+	int readFile(const char* filename, GLchar** ShaderSource, unsigned long* len);
+
+private:
+	ParticleSystem* particles;
 };
 

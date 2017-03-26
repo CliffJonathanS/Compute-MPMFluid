@@ -3,6 +3,15 @@
 using namespace std;
 
 const int WORK_GROUP_SIZE = 128;
+static unsigned int mirand = 1;
+
+float sfrand(void)
+{
+	unsigned int a;
+	mirand *= 16807;
+	a = (mirand & 0x007fffff) | 0x40000000;
+	return(*((float*)&a) - 3.0f);
+}
 
 ParticleSystem::ParticleSystem(size_t partSize) : size(partSize)
 {
@@ -21,6 +30,8 @@ ParticleSystem::ParticleSystem(size_t partSize) : size(partSize)
 		*(indices++) = j + 3;
 	}
 	index->unmap();
+
+	initialize();
 
 	loadShaders();
 }
@@ -114,6 +125,23 @@ void ParticleSystem::loadShaders()
 
 void ParticleSystem::initialize()
 {
+	float (*position)[4] = pos->map();
+	for (size_t i = 0; i<size; i++) {
+		position[i][0] = sfrand()*size;
+		position[i][1] = sfrand()*size;
+		position[i][2] = sfrand()*size;
+		position[i][3] = 1.0f;
+	}
+	pos->unmap();
+
+	float(*velocity)[4] = vel->map();
+	for (size_t i = 0; i<size; i++) {
+		velocity[i][0] = sfrand()*size;
+		velocity[i][1] = sfrand()*size;
+		velocity[i][2] = sfrand()*size;
+		velocity[i][3] = 1.0f;
+	}
+	vel->unmap();
 }
 
 void ParticleSystem::update()

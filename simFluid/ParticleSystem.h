@@ -1,3 +1,6 @@
+#ifndef PARTICLE_SYSTEM_H
+#define PARTICLE_SYSTEM_H
+
 // Include OpenGL dependencies
 #include "Dependencies\glew\glew.h"
 #include "Dependencies\freeglut\freeglut.h"
@@ -16,16 +19,20 @@
 	Description	: The particle system class which initializes and runs the Compute Shader
 				  program to calculate the particle positions for each frame.
 */
-#pragma once
 class ParticleSystem
 {
 public:
 	ParticleSystem(size_t size);
 	~ParticleSystem();
 
-	void loadShaders();
-	void initialize();
-	void update();
+	void loadShaders(void);
+	void initialize(void);
+	void update(void);
+
+	ShaderBuffer<float[4]> *getPosBuffer() { return pos; }
+	ShaderBuffer<float[4]> *getVelBuffer() { return vel; }
+	ShaderBuffer<uint32_t> *getIndexBuffer() { return index; }
+	size_t getSize() { return size; }
 
 private:
 	size_t size;
@@ -37,4 +44,4 @@ private:
 	GLuint updateProg;
 	GLuint progPipeline;
 };
-
+#endif

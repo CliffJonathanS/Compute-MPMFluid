@@ -111,10 +111,10 @@ ComputeMain::ComputeMain(int argc, char **argv)
 		cout << "GL version is supported.\n";
 	else
 		cout << "GL version is not supported. Compute shader requires the minimum of OpenGL version 4.3. \n";
-
+	currInstance = this;
 	initRendering();
 	glEnable(GL_DEPTH_TEST);
-	glutDisplayFunc(update);
+	glutDisplayFunc(draw);
 
 	// Main loop to keep the window running
 	glutMainLoop();
@@ -129,7 +129,30 @@ void ComputeMain::update(void)
 {
 	// Clears the buffer and paint the background black
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0);
+	glClearColor(0.1f, 0.0f, 0.0f, 1.0);
+
+	glActiveTexture(GL_TEXTURE0);
+
+	particles->update();
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);  // additive blend
+
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+
+	// reference the compute shader buffer, which we will use for the particle
+	// locations (only the positions for now)
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, particles->getPosBuffer()->getBuffer());
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, particles->getIndexBuffer()->getBuffer());
+
+	glDrawElements(GL_TRIANGLES, GLsizei(particles->getSize() * 6), GL_UNSIGNED_INT, 0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0);
+
+	glDisable(GL_BLEND);
 
 	glutSwapBuffers();
 }
@@ -139,8 +162,33 @@ void ComputeMain::initRendering(void)
 	// Read the shader files
 	GLuint program = LoadVFShaders("vertex.glsl", "fragment.glsl");
 	glUseProgram(program);
+	/*
+	//create ubo and initialize it with the structure data
+	glGenBuffers(1, &mUBO);
+	glBindBuffer(GL_UNIFORM_BUFFER, mUBO);
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(ShaderParams), &mShaderParams, GL_STREAM_DRAW);*/
+
+	//create simple single-vertex VBO
+	float vtx_data[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	glGenBuffers(1, &mVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vtx_data), vtx_data, GL_STATIC_DRAW);
 
 	particles = new ParticleSystem(10);
+
+	int cx, cy, cz;
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &cx);
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, &cy);
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, &cz);
+	printf("Max compute work group count = %d, %d, %d\n", cx, cy, cz);
+
+	int sx, sy, sz;
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &sx);
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &sy);
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &sz);
+	printf("Max compute work group size  = %d, %d, %d\n", sx, sy, sz);
+
+	
 }
 
 unsigned long getFileLength(ifstream& file)

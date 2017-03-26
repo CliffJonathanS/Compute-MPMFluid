@@ -1,3 +1,5 @@
+#ifndef COMPUTE_MAIN_H
+#define COMPUTE_MAIN_H
 // Include OpenGL dependencies
 #include "Dependencies\glew\glew.h"
 #include "Dependencies\freeglut\freeglut.h"
@@ -16,7 +18,6 @@
 	Description	: Main class used to set up OpenGL environment and create the window
 				  to run the fluid simulation.
 */
-#pragma once
 class ComputeMain
 {
 public:
@@ -25,11 +26,21 @@ public:
 	~ComputeMain();
 
 	// Methods
-	static void update();
-	void initRendering();
+	void update(void);
+	void initRendering(void);
 	int readFile(const char* filename, GLchar** ShaderSource, unsigned long* len);
 
 private:
-	ParticleSystem* particles;
+	ParticleSystem *particles;
+	GLuint mVBO;
 };
 
+ComputeMain* currInstance;
+
+extern "C"
+void draw()
+{
+	currInstance->update();
+}
+
+#endif

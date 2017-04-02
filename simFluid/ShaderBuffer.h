@@ -50,7 +50,7 @@ public:
     void bind();
     void unbind();
 
-    T *map(GLbitfield access = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+    T *map(GLbitfield access = GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_WRITE_BIT);
     void unmap();
 
     GLuint getBuffer() { return m_buffer; }

@@ -92,6 +92,16 @@ GLuint LoadVFShaders(const char * vertex_file_path, const char * fragment_file_p
 
 	return ProgramID;
 }
+// This will identify our vertex buffer
+GLuint vertexbuffer;
+// An array of 3 vectors which represents 3 vertices
+static const GLfloat g_vertex_buffer_data[] = {
+	-1.0f, -1.0f, 0.0f,
+	1.0f, -1.0f, 0.0f,
+	0.0f,  1.0f, 0.0f,
+};
+
+
 
 ComputeMain::ComputeMain(int argc, char **argv)
 {
@@ -129,10 +139,10 @@ void ComputeMain::update(void)
 {
 	// Clears the buffer and paint the background black
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-	glClearColor(0.1f, 0.0f, 0.0f, 1.0);
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0);
 
 	glActiveTexture(GL_TEXTURE0);
-
+	
 	particles->update();
 
 	glEnable(GL_BLEND);
@@ -147,6 +157,25 @@ void ComputeMain::update(void)
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, particles->getIndexBuffer()->getBuffer());
 
+
+	/*
+	// 1rst attribute buffer : vertices
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glVertexAttribPointer(
+		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+	);
+	// Draw the triangle !
+	glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
+	glDisableVertexAttribArray(0);
+	*/
+
+	
 	glDrawElements(GL_TRIANGLES, GLsizei(particles->getSize() * 6), GL_UNSIGNED_INT, 0);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -155,6 +184,7 @@ void ComputeMain::update(void)
 	glDisable(GL_BLEND);
 
 	glutSwapBuffers();
+	glutPostRedisplay();
 }
 
 void ComputeMain::initRendering(void)
@@ -162,9 +192,9 @@ void ComputeMain::initRendering(void)
 	// Read the shader files
 	GLuint program = LoadVFShaders("vertex.glsl", "fragment.glsl");
 	glUseProgram(program);
-	/*
+	
 	//create ubo and initialize it with the structure data
-	glGenBuffers(1, &mUBO);
+	/*glGenBuffers(1, &mUBO);
 	glBindBuffer(GL_UNIFORM_BUFFER, mUBO);
 	glBufferData(GL_UNIFORM_BUFFER, sizeof(ShaderParams), &mShaderParams, GL_STREAM_DRAW);*/
 
@@ -174,7 +204,7 @@ void ComputeMain::initRendering(void)
 	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vtx_data), vtx_data, GL_STATIC_DRAW);
 
-	particles = new ParticleSystem(10);
+	particles = new ParticleSystem(100);
 
 	int cx, cy, cz;
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &cx);
@@ -187,6 +217,16 @@ void ComputeMain::initRendering(void)
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &sy);
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &sz);
 	printf("Max compute work group size  = %d, %d, %d\n", sx, sy, sz);
+
+
+	/*
+	// Generate 1 buffer, put the resulting identifier in vertexbuffer
+	glGenBuffers(1, &vertexbuffer);
+	// The following commands will talk about our 'vertexbuffer' buffer
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	// Give our vertices to OpenGL.
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+	*/
 
 	
 }

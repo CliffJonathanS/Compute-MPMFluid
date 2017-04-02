@@ -30,12 +30,18 @@
     <ClInclude Include="ShaderBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="vec4f.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ComputeMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ParticleSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vec4f.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

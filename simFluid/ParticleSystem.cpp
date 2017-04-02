@@ -10,13 +10,13 @@ float sfrand(void)
 	unsigned int a;
 	mirand *= 16807;
 	a = (mirand & 0x007fffff) | 0x40000000;
-	return(*((float*)&a) - 3.0f);
+	return((*((float*)&a) - 3.0f));
 }
 
 ParticleSystem::ParticleSystem(size_t partSize) : size(partSize)
 {
-	pos = new ShaderBuffer<float[4]>(size);
-	vel = new ShaderBuffer<float[4]>(size);
+	pos = new ShaderBuffer<vec4f>(size);
+	vel = new ShaderBuffer<vec4f>(size);
 	index = new ShaderBuffer<uint32_t>(size * 6);
 
 	uint32_t *indices = index->map();
@@ -31,9 +31,8 @@ ParticleSystem::ParticleSystem(size_t partSize) : size(partSize)
 	}
 	index->unmap();
 
-	initialize();
-
 	loadShaders();
+	initialize();
 }
 
 
@@ -53,8 +52,6 @@ void ParticleSystem::loadShaders()
 	}
 
 	glGenProgramPipelines(1, &progPipeline);
-
-
 
 	// Create the shaders
 	GLuint ComputeShaderID = glCreateShader(GL_COMPUTE_SHADER);
@@ -125,21 +122,21 @@ void ParticleSystem::loadShaders()
 
 void ParticleSystem::initialize()
 {
-	float (*position)[4] = pos->map();
+	vec4f *position = pos->map();
 	for (size_t i = 0; i<size; i++) {
-		position[i][0] = sfrand()*size;
-		position[i][1] = sfrand()*size;
-		position[i][2] = sfrand()*size;
-		position[i][3] = 1.0f;
+		position[i].x = sfrand()*0.5;
+		position[i].y = sfrand()*0.5;
+		position[i].z = 0.0;
+		position[i].w = 1.0;
 	}
 	pos->unmap();
 
-	float(*velocity)[4] = vel->map();
+	vec4f *velocity = vel->map();
 	for (size_t i = 0; i<size; i++) {
-		velocity[i][0] = sfrand()*size;
-		velocity[i][1] = sfrand()*size;
-		velocity[i][2] = sfrand()*size;
-		velocity[i][3] = 1.0f;
+		velocity[i].x = 0.0;
+		velocity[i].y = 0.0;
+		velocity[i].z = 0.0;
+		velocity[i].w = 0.0;
 	}
 	vel->unmap();
 }

@@ -118,10 +118,12 @@
     <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ShaderBuffer.h" />
+    <ClInclude Include="vec4f.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ComputeMain.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
+    <ClCompile Include="vec4f.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />

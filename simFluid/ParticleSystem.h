@@ -7,6 +7,7 @@
 
 // Include dependency
 #include "ShaderBuffer.h"
+#include "vec4f.h"
 
 // Include headers
 #include <iostream>
@@ -29,16 +30,16 @@ public:
 	void initialize(void);
 	void update(void);
 
-	ShaderBuffer<float[4]> *getPosBuffer() { return pos; }
-	ShaderBuffer<float[4]> *getVelBuffer() { return vel; }
+	ShaderBuffer<vec4f> *getPosBuffer() { return pos; }
+	ShaderBuffer<vec4f> *getVelBuffer() { return vel; }
 	ShaderBuffer<uint32_t> *getIndexBuffer() { return index; }
 	size_t getSize() { return size; }
 
 private:
 	size_t size;
 
-	ShaderBuffer<float[4]> *pos;
-	ShaderBuffer<float[4]> *vel;
+	ShaderBuffer<vec4f> *pos;
+	ShaderBuffer<vec4f> *vel;
 	ShaderBuffer<uint32_t> *index;
 
 	GLuint updateProg;

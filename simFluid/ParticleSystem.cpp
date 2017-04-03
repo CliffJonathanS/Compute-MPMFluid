@@ -53,8 +53,7 @@ void ParticleSystem::loadShaders()
 
 	glGenProgramPipelines(1, &progPipeline);
 
-	// Create the shaders
-	GLuint ComputeShaderID = glCreateShader(GL_COMPUTE_SHADER);
+
 
 	// Read the Compute Shader code from the file
 	string ComputeShaderCode;
@@ -69,9 +68,12 @@ void ParticleSystem::loadShaders()
 		getchar();
 	}
 
-	GLint Result = GL_FALSE;
-	int InfoLogLength;
+	const GLchar* src[1] = { ComputeShaderCode.c_str() };
+	//cout << ComputeShaderCode.c_str() << endl;
 
+	// Create the shaders
+	GLuint ProgramID = glCreateShaderProgramv(GL_COMPUTE_SHADER, 1, src);
+	/*
 	// Compile Compute Shader
 	char const * ComputeSourcePointer = ComputeShaderCode.c_str();
 	glShaderSource(ComputeShaderID, 1, &ComputeSourcePointer, NULL);
@@ -81,24 +83,34 @@ void ParticleSystem::loadShaders()
 	glGetShaderiv(ComputeShaderID, GL_COMPILE_STATUS, &Result);
 	glGetShaderiv(ComputeShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
 	if (InfoLogLength > 0) {
-		vector<char> ComputeShaderErrorMessage(InfoLogLength + 1);
-		glGetShaderInfoLog(ComputeShaderID, InfoLogLength, NULL, &ComputeShaderErrorMessage[0]);
-		printf("%s\n", &ComputeShaderErrorMessage[0]);
+	vector<char> ComputeShaderErrorMessage(InfoLogLength + 1);
+	glGetShaderInfoLog(ComputeShaderID, InfoLogLength, NULL, &ComputeShaderErrorMessage[0]);
+	printf("%s\n", &ComputeShaderErrorMessage[0]);
 	}
 
 	// Link the program
 	GLuint ProgramID = glCreateProgram();
 	glAttachShader(ProgramID, ComputeShaderID);
 	glLinkProgram(ProgramID);
+	*/
+	GLint Result = GL_FALSE;
+	int InfoLogLength;
 
 	// Check the program
-	glGetProgramiv(ProgramID, GL_LINK_STATUS, &Result);
+	
 	glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength);
 	if (InfoLogLength > 0) {
+		char *log = new char[InfoLogLength];
+		glGetProgramInfoLog(ProgramID, InfoLogLength, 0, log);
+		printf("Shader pipeline program not valid:\n%s\n", log);
+		delete[] log;
+	}
+	
+	/*if (InfoLogLength > 0) {
 		vector<char> ProgramErrorMessage(InfoLogLength + 1);
 		glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
 		printf("%s\n", &ProgramErrorMessage[0]);
-	}
+	}*/
 
 	glBindProgramPipeline(progPipeline);
 	glUseProgramStages(progPipeline, GL_COMPUTE_SHADER_BIT, ProgramID);
@@ -106,14 +118,13 @@ void ParticleSystem::loadShaders()
 	glGetProgramPipelineiv(progPipeline, GL_VALIDATE_STATUS, &Result);
 
 	if (Result != GL_TRUE) {
+		GLint InfoLogLength;
 		glGetProgramPipelineiv(progPipeline, GL_INFO_LOG_LENGTH, &InfoLogLength);
 		char *log = new char[InfoLogLength];
 		glGetProgramPipelineInfoLog(progPipeline, InfoLogLength, 0, log);
+		printf("Shader pipeline not valid:\n%s\n", log);
 		delete[] log;
 	}
-
-	glDetachShader(ProgramID, ComputeShaderID);
-	glDeleteShader(ComputeShaderID);
 
 	updateProg = ProgramID;
 	glBindProgramPipeline(progPipeline);

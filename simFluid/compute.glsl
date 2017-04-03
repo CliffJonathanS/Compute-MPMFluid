@@ -36,4 +36,5 @@ void main() {
 	// write new values
 	pos[i] = vec4(p, 1.0);
 	vel[i] = vec4(v, 0.0);
+
 }

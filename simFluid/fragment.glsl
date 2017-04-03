@@ -1,6 +1,5 @@
 #version 430 core
 #extension GL_EXT_shader_io_blocks : enable
-precision highp float;
 
 in block {
     vec4 color;

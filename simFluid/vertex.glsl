@@ -1,8 +1,6 @@
 #version 430 core
 #extension GL_EXT_shader_io_blocks : enable
 
-precision highp float;
-
 //layout(location = 0) in vec3 vertexPosition_modelspace;
 
 layout(std430, binding=1) buffer Pos {

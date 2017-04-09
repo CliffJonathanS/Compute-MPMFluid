@@ -33,6 +33,7 @@ public:
 private:
 	ParticleSystem *particles;
 	GLuint mVBO;
+	GLuint program;
 };
 
 ComputeMain* currInstance;

@@ -44,5 +44,8 @@ private:
 
 	GLuint updateProg;
 	GLuint progPipeline;
+	GLuint ProgramID;
+
+	float scaletowindow;
 };
 #endif

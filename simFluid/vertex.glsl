@@ -21,7 +21,7 @@ void main() {
     int particleID = gl_VertexID >> 2; // 4 vertices per particle
     vec4 particlePos = pos[particleID];
 
-    Out.color = vec4(1.0, 1.0, 1.0, 1.0);
+    Out.color = vec4(0.4, 0.8, 1.0, 1.0);
 
     //map vertex ID to quad vertex
     vec2 quadPos = vec2( ((gl_VertexID - 1) & 2) >> 1, (gl_VertexID & 2) >> 1);

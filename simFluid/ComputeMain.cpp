@@ -8,6 +8,8 @@ extern "C"
 	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 
+float bg = 0.1;
+
 GLuint LoadVFShaders(const char * vertex_file_path, const char * fragment_file_path) {
 
 	// Create the shaders
@@ -139,12 +141,14 @@ void ComputeMain::update(void)
 {
 	// Clears the buffer and paint the background black
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0);
+	glClearColor(bg, bg, bg, 1.0);
 
 	glActiveTexture(GL_TEXTURE0);
 	
 	particles->update();
 
+
+	glUseProgram(program);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);  // additive blend
 
@@ -158,23 +162,6 @@ void ComputeMain::update(void)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, particles->getIndexBuffer()->getBuffer());
 
 
-	/*
-	// 1rst attribute buffer : vertices
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glVertexAttribPointer(
-		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
-	);
-	// Draw the triangle !
-	glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
-	glDisableVertexAttribArray(0);
-	*/
-
 	
 	glDrawElements(GL_TRIANGLES, GLsizei(particles->getSize() * 6), GL_UNSIGNED_INT, 0);
 
@@ -182,7 +169,9 @@ void ComputeMain::update(void)
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0);
 
 	glDisable(GL_BLEND);
+	glUseProgram(0);
 
+	//bg += 0.01;
 	glutSwapBuffers();
 	glutPostRedisplay();
 }
@@ -190,8 +179,8 @@ void ComputeMain::update(void)
 void ComputeMain::initRendering(void)
 {
 	// Read the shader files
-	GLuint program = LoadVFShaders("vertex.glsl", "fragment.glsl");
-	glUseProgram(program);
+	program = LoadVFShaders("vertex.glsl", "fragment.glsl");
+	//glUseProgram(program);
 	
 	//create ubo and initialize it with the structure data
 	/*glGenBuffers(1, &mUBO);
@@ -204,7 +193,7 @@ void ComputeMain::initRendering(void)
 	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vtx_data), vtx_data, GL_STATIC_DRAW);
 
-	particles = new ParticleSystem(100);
+	particles = new ParticleSystem(1000);
 
 	int cx, cy, cz;
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &cx);

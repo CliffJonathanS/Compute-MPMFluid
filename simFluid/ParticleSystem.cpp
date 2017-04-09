@@ -2,7 +2,7 @@
 
 using namespace std;
 
-const int WORK_GROUP_SIZE = 128;
+const int WORK_GROUP_SIZE = 256;
 static unsigned int mirand = 1;
 
 float sfrand(void)
@@ -13,11 +13,32 @@ float sfrand(void)
 	return((*((float*)&a) - 3.0f));
 }
 
+void _check_gl_error(const char *file, int line) {
+	GLenum err(glGetError());
+
+	while (err != GL_NO_ERROR) {
+		string error;
+
+		switch (err) {
+		case GL_INVALID_OPERATION:      error = "INVALID_OPERATION";      break;
+		case GL_INVALID_ENUM:           error = "INVALID_ENUM";           break;
+		case GL_INVALID_VALUE:          error = "INVALID_VALUE";          break;
+		case GL_OUT_OF_MEMORY:          error = "OUT_OF_MEMORY";          break;
+		case GL_INVALID_FRAMEBUFFER_OPERATION:  error = "INVALID_FRAMEBUFFER_OPERATION";  break;
+		}
+
+		cerr << "GL_" << error.c_str() << " - " << file << ":" << line << endl;
+		err = glGetError();
+	}
+}
+
 ParticleSystem::ParticleSystem(size_t partSize) : size(partSize)
 {
 	pos = new ShaderBuffer<vec4f>(size);
 	vel = new ShaderBuffer<vec4f>(size);
 	index = new ShaderBuffer<uint32_t>(size * 6);
+
+	scaletowindow = 1.0;
 
 	uint32_t *indices = index->map();
 	for (size_t i = 0; i<size; i++) {
@@ -33,6 +54,7 @@ ParticleSystem::ParticleSystem(size_t partSize) : size(partSize)
 
 	loadShaders();
 	initialize();
+	
 }
 
 
@@ -48,13 +70,12 @@ void ParticleSystem::loadShaders()
 {
 	if (updateProg) {
 		glDeleteProgram(updateProg);
+		cout << "Error ??11 : " << glGetError() << endl;
 		updateProg = 0;
 	}
 
-	glGenProgramPipelines(1, &progPipeline);
 
-
-
+	
 	// Read the Compute Shader code from the file
 	string ComputeShaderCode;
 	ifstream ComputeShaderStream("compute.glsl", ios::in);
@@ -73,70 +94,67 @@ void ParticleSystem::loadShaders()
 
 	// Create the shaders
 	GLuint ProgramID = glCreateShaderProgramv(GL_COMPUTE_SHADER, 1, src);
-	/*
-	// Compile Compute Shader
-	char const * ComputeSourcePointer = ComputeShaderCode.c_str();
-	glShaderSource(ComputeShaderID, 1, &ComputeSourcePointer, NULL);
-	glCompileShader(ComputeShaderID);
-
-	// Check Compute Shader
-	glGetShaderiv(ComputeShaderID, GL_COMPILE_STATUS, &Result);
-	glGetShaderiv(ComputeShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-	if (InfoLogLength > 0) {
-	vector<char> ComputeShaderErrorMessage(InfoLogLength + 1);
-	glGetShaderInfoLog(ComputeShaderID, InfoLogLength, NULL, &ComputeShaderErrorMessage[0]);
-	printf("%s\n", &ComputeShaderErrorMessage[0]);
-	}
-
-	// Link the program
-	GLuint ProgramID = glCreateProgram();
-	glAttachShader(ProgramID, ComputeShaderID);
-	glLinkProgram(ProgramID);
-	*/
 	GLint Result = GL_FALSE;
 	int InfoLogLength;
-
+	cout << "Error ?? : " << glGetError() << endl;
 	// Check the program
+
+	glGenProgramPipelines(1, &progPipeline);
+	cout << "Error ?? : " << glGetError() << endl;
 	
 	glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength);
+	cout << "Error ?? : " << glGetError() << endl;
 	if (InfoLogLength > 0) {
 		char *log = new char[InfoLogLength];
 		glGetProgramInfoLog(ProgramID, InfoLogLength, 0, log);
+		cout << "Error ?? : " << glGetError() << endl;
 		printf("Shader pipeline program not valid:\n%s\n", log);
 		delete[] log;
+
+	}
+	else
+	{
+		cout << "berhasil 1" << endl;
 	}
 	
-	/*if (InfoLogLength > 0) {
-		vector<char> ProgramErrorMessage(InfoLogLength + 1);
-		glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
-		printf("%s\n", &ProgramErrorMessage[0]);
-	}*/
 
 	glBindProgramPipeline(progPipeline);
+	cout << "Error ?? : " << glGetError() << endl;
 	glUseProgramStages(progPipeline, GL_COMPUTE_SHADER_BIT, ProgramID);
+	cout << "Error ?? : " << glGetError() << endl;
 	glValidateProgramPipeline(progPipeline);
+	cout << "Error ?? : " << glGetError() << endl;
 	glGetProgramPipelineiv(progPipeline, GL_VALIDATE_STATUS, &Result);
+	cout << "Error ?? : " << glGetError() << endl;
 
 	if (Result != GL_TRUE) {
 		GLint InfoLogLength;
 		glGetProgramPipelineiv(progPipeline, GL_INFO_LOG_LENGTH, &InfoLogLength);
+		cout << "Error ?? : " << glGetError() << endl;
 		char *log = new char[InfoLogLength];
 		glGetProgramPipelineInfoLog(progPipeline, InfoLogLength, 0, log);
+		cout << "Error ?? : " << glGetError() << endl;
 		printf("Shader pipeline not valid:\n%s\n", log);
 		delete[] log;
 	}
+	else
+	{
+		cout << "berhasil 2" << endl;
+	}
 
 	updateProg = ProgramID;
-	glBindProgramPipeline(progPipeline);
+	//glBindProgramPipeline(progPipeline);
+	cout << "Error ?? : " << glGetError() << endl;
 	glBindProgramPipeline(0);
+	cout << "Error ?? : " << glGetError() << endl;
 }
 
 void ParticleSystem::initialize()
 {
 	vec4f *position = pos->map();
 	for (size_t i = 0; i<size; i++) {
-		position[i].x = sfrand()*0.5;
-		position[i].y = sfrand()*0.5;
+		position[i].x = sfrand()*scaletowindow;
+		position[i].y = sfrand()*scaletowindow;
 		position[i].z = 0.0;
 		position[i].w = 1.0;
 	}
@@ -150,6 +168,7 @@ void ParticleSystem::initialize()
 		velocity[i].w = 0.0;
 	}
 	vel->unmap();
+	//scaletowindow += 0.001;
 }
 
 void ParticleSystem::update()
@@ -161,8 +180,8 @@ void ParticleSystem::update()
 
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, pos->getBuffer());
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, vel->getBuffer());
-
-	glDispatchCompute(GLuint(size / WORK_GROUP_SIZE), 1, 1);
+	
+	glDispatchCompute(256, 1, 1);
 
 	// We need to block here on compute completion to ensure that the
 	// computation is done before we render

@@ -19,6 +19,14 @@ vec3 sinus(vec3 p) {
 	return vec3(0.001, sin(p.x*40)/500, 0.0);
 }
 
+vec3 gravitation(vec3 p, vec3 v) {
+	vec3 g = vec3(0.0, v.y - 0.003, 0.0);
+	if (p.y <= -1.0) {
+		g = -0.45 * g;
+	}
+	return g;
+}
+
 // compute shader to update particles
 void main() {
 	uint i = gl_GlobalInvocationID.x;
@@ -30,7 +38,8 @@ void main() {
 	vec3 p = pos[i].xyz;
 	vec3 v = vel[i].xyz;
 
-	v = sinus(p);
+	//v = sinus(p);
+	v = gravitation(p, v);
 
 	p += v;
 

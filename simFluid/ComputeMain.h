@@ -34,6 +34,10 @@ private:
 	ParticleSystem *particles;
 	GLuint mVBO;
 	GLuint program;
+
+	int currentTime;
+	int timebase;
+	int frame;
 };
 
 ComputeMain* currInstance;

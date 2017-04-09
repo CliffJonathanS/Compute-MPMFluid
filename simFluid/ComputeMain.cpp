@@ -124,6 +124,7 @@ ComputeMain::ComputeMain(int argc, char **argv)
 	else
 		cout << "GL version is not supported. Compute shader requires the minimum of OpenGL version 4.3. \n";
 	currInstance = this;
+	
 	initRendering();
 	glEnable(GL_DEPTH_TEST);
 	glutDisplayFunc(draw);
@@ -170,6 +171,22 @@ void ComputeMain::update(void)
 
 	glDisable(GL_BLEND);
 	glUseProgram(0);
+
+	frame++;
+
+	//get the current time
+	currentTime = glutGet(GLUT_ELAPSED_TIME);
+
+	//check if a second has passed
+	if (currentTime - timebase > 1000)
+	{
+		float fps = frame*1000.0 / (currentTime - timebase);
+		char title[32];
+		sprintf_s(title, 32, "simFluid FPS: %4.2f", fps);
+		glutSetWindowTitle(title);
+		timebase = currentTime;
+		frame = 0;
+	}
 
 	//bg += 0.01;
 	glutSwapBuffers();

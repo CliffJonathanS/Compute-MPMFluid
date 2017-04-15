@@ -39,7 +39,7 @@ void main() {
 	vec3 v = vel[i].xyz;
 
 	//v = sinus(p);
-	v = gravitation(p, v);
+	//v = gravitation(p, v);
 
 	p += v;
 

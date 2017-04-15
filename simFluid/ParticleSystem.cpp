@@ -157,6 +157,7 @@ void ParticleSystem::initialize()
 		position[i].y = sfrand()*scaletowindow;
 		position[i].z = 0.0;
 		position[i].w = 1.0;
+		//cout << position[i].x << endl;
 	}
 	pos->unmap();
 

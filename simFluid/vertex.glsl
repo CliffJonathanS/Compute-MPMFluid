@@ -18,8 +18,8 @@ out block {
 
 void main() {
     // expand points to quads without using GS
-    int particleID = gl_VertexID >> 2; // 4 vertices per particle
-    vec4 particlePos = pos[particleID];
+    //int particleID = gl_VertexID >> 2; // 4 vertices per particle
+    vec4 particlePos = pos[gl_VertexID];
 
     Out.color = vec4(0.4, 0.8, 1.0, 1.0);
 
@@ -27,7 +27,7 @@ void main() {
     vec2 quadPos = vec2( ((gl_VertexID - 1) & 2) >> 1, (gl_VertexID & 2) >> 1);
 
     Out.texCoord = quadPos;
-    gl_Position = particlePos + vec4((quadPos*2.0 - 1.0)*0.01, 0, 0);
+    gl_Position = particlePos;
 	//if (particlePos.x < 0)
 		//gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
 

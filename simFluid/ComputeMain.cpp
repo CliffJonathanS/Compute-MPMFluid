@@ -8,7 +8,7 @@ extern "C"
 	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 
-float bg = 0.1;
+float bg = 0.1f;
 
 GLuint LoadVFShaders(const char * vertex_file_path, const char * fragment_file_path) {
 
@@ -163,8 +163,8 @@ void ComputeMain::update(void)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, particles->getIndexBuffer()->getBuffer());
 
 
-	
-	glDrawElements(GL_TRIANGLES, GLsizei(particles->getSize() * 6), GL_UNSIGNED_INT, 0);
+	glPointSize(2.0f);
+	glDrawElements(GL_POINTS, GLsizei(particles->getSize())*6, GL_UNSIGNED_INT, 0);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0);

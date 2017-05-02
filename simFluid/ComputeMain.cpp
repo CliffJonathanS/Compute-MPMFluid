@@ -16,6 +16,20 @@ GLuint LoadVFShaders(const char * vertex_file_path, const char * fragment_file_p
 	GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
 	GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
 
+	// Read uniforms file
+	string uniformsCode;
+	ifstream uniformsStream("uniforms.h", ios::in);
+	if (uniformsStream.is_open()) {
+		string Line = "";
+		while (getline(uniformsStream, Line))
+			uniformsCode += "\n" + Line;
+		uniformsStream.close();
+	}
+	else {
+		getchar();
+		return 0;
+	}
+
 	// Read the Vertex Shader code from the file
 	string VertexShaderCode;
 	ifstream VertexShaderStream(vertex_file_path, ios::in);
@@ -29,6 +43,20 @@ GLuint LoadVFShaders(const char * vertex_file_path, const char * fragment_file_p
 		getchar();
 		return 0;
 	}
+
+	size_t uniformTagPos = VertexShaderCode.find("#UNIFORMS");
+	string dest = "";
+	if (uniformTagPos != string::npos) {
+		dest += VertexShaderCode.substr(0, uniformTagPos); // source up to tag
+		dest += "\n";
+		dest += uniformsCode;
+		dest += "\n";
+		dest += VertexShaderCode.substr(uniformTagPos + strlen("#UNIFORMS"), VertexShaderCode.length() - uniformTagPos);
+	}
+	else {
+		dest += VertexShaderCode;
+	}
+	VertexShaderCode = dest;
 
 	// Read the Fragment Shader code from the file
 	string FragmentShaderCode;
@@ -147,8 +175,22 @@ void ComputeMain::update(void)
 	glActiveTexture(GL_TEXTURE0);
 	
 	particles->update();
-
-
+	glLineWidth(1);
+	glColor3f(0.5, 0.0, 0.0);
+	float gridSize = 0.05f;
+	int gridNum = 2 / gridSize;
+	for (int i = 0; i < gridNum; i++) {
+		glBegin(GL_LINES);
+		glVertex3f(i*gridSize - 1, -1.0, 0.0);
+		glVertex3f(i*gridSize - 1, 1.0, 0.0);
+		glEnd();
+	}
+	for (int i = 0; i < gridNum; i++) {
+		glBegin(GL_LINES);
+		glVertex3f(-1.0, i*gridSize - 1, 0.0);
+		glVertex3f(1.0, i*gridSize - 1, 0.0);
+		glEnd();
+	}
 	glUseProgram(program);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);  // additive blend
@@ -156,9 +198,11 @@ void ComputeMain::update(void)
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 
+	
+
 	// reference the compute shader buffer, which we will use for the particle
 	// locations (only the positions for now)
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, particles->getPosBuffer()->getBuffer());
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, particles->getParticlesBuffer()->getBuffer());
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, particles->getIndexBuffer()->getBuffer());
 
@@ -199,11 +243,11 @@ void ComputeMain::initRendering(void)
 	program = LoadVFShaders("vertex.glsl", "fragment.glsl");
 	//glUseProgram(program);
 	
-	//create ubo and initialize it with the structure data
-	/*glGenBuffers(1, &mUBO);
+	/*//create ubo and initialize it with the structure data
+	glGenBuffers(1, &mUBO);
 	glBindBuffer(GL_UNIFORM_BUFFER, mUBO);
-	glBufferData(GL_UNIFORM_BUFFER, sizeof(ShaderParams), &mShaderParams, GL_STREAM_DRAW);*/
-
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(Node) + sizeof(Praticle), &mShaderParams, GL_STREAM_DRAW);
+	*/
 	//create simple single-vertex VBO
 	float vtx_data[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	glGenBuffers(1, &mVBO);
@@ -247,37 +291,6 @@ unsigned long getFileLength(ifstream& file)
 	file.seekg(ios::beg);
 
 	return len;
-}
-
-int ComputeMain::readFile(const char* filename, GLchar** ShaderSource, unsigned long* len) {
-	ifstream file;
-	file.open(filename, ios::in);						// Open the file
-	if (!file) return -1;
-
-	*len = getFileLength(file);
-
-	if (len == 0) return -2;							// Error: Empty File 
-
-	*ShaderSource = (GLchar*) new char[*len + 1];
-	if (*ShaderSource == 0) return -3;   // can't reserve memory
-
-										 // len isn't always strlen cause some characters are stripped in ascii read...
-										 // it is important to 0-terminate the real length later, len is just max possible value... 
-	*ShaderSource[*len] = 0;
-
-	unsigned int i = 0;
-	while (file.good())
-	{
-		*ShaderSource[i] = file.get();       // get character from file.
-		if (!file.eof())
-			i++;
-	}
-
-	*ShaderSource[i] = 0;  // 0-terminate it at the correct position
-
-	file.close();
-
-	return 0; // No Error
 }
 
 

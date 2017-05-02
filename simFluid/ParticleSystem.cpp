@@ -34,9 +34,14 @@ void _check_gl_error(const char *file, int line) {
 
 ParticleSystem::ParticleSystem(size_t partSize) : size(partSize)
 {
-	pos = new ShaderBuffer<vec4f>(size);
-	vel = new ShaderBuffer<vec4f>(size);
+	/*pos = new ShaderBuffer<vec4f>(size);
+	vel = new ShaderBuffer<vec4f>(size);*/
 	index = new ShaderBuffer<uint32_t>(size * 6);
+	//gridWeight = new ShaderBuffer<float>(1600);
+	gridIndex = new ShaderBuffer<uint32_t>(size * 6);
+
+	nodes = new ShaderBuffer<Node>(1600);
+	particles = new ShaderBuffer<Particle>(size);
 
 	scaletowindow = 1.0;
 
@@ -52,6 +57,18 @@ ParticleSystem::ParticleSystem(size_t partSize) : size(partSize)
 	}
 	index->unmap();
 
+	indices = gridIndex->map();
+	for (size_t i = 0; i<size; i++) {
+		uint32_t j = uint32_t(i << 2);
+		*(indices++) = j;
+		*(indices++) = j + 1;
+		*(indices++) = j + 2;
+		*(indices++) = j;
+		*(indices++) = j + 2;
+		*(indices++) = j + 3;
+	}
+	gridIndex->unmap();
+
 	loadShaders();
 	initialize();
 	
@@ -60,8 +77,8 @@ ParticleSystem::ParticleSystem(size_t partSize) : size(partSize)
 
 ParticleSystem::~ParticleSystem()
 {
-	delete pos;
-	delete vel;
+	delete particles;
+	delete nodes;
 
 	glDeleteProgram(updateProg);
 }
@@ -74,7 +91,18 @@ void ParticleSystem::loadShaders()
 		updateProg = 0;
 	}
 
-
+	// Read uniforms file
+	string uniformsCode;
+	ifstream uniformsStream("uniforms.h", ios::in);
+	if (uniformsStream.is_open()) {
+		string Line = "";
+		while (getline(uniformsStream, Line))
+			uniformsCode += "\n" + Line;
+		uniformsStream.close();
+	}
+	else {
+		getchar();
+	}
 	
 	// Read the Compute Shader code from the file
 	string ComputeShaderCode;
@@ -88,6 +116,20 @@ void ParticleSystem::loadShaders()
 	else {
 		getchar();
 	}
+	size_t uniformTagPos = ComputeShaderCode.find("#UNIFORMS");
+	string dest = "";
+	if (uniformTagPos != string::npos) {
+		dest += ComputeShaderCode.substr(0, uniformTagPos); // source up to tag
+		dest += "\n";
+		dest += uniformsCode;
+		dest += "\n";
+		dest += ComputeShaderCode.substr(uniformTagPos + strlen("#UNIFORMS"), ComputeShaderCode.length() - uniformTagPos);
+	}
+	else {
+		dest += ComputeShaderCode;
+	}
+	ComputeShaderCode = dest;
+
 
 	const GLchar* src[1] = { ComputeShaderCode.c_str() };
 	//cout << ComputeShaderCode.c_str() << endl;
@@ -112,10 +154,6 @@ void ParticleSystem::loadShaders()
 		delete[] log;
 
 	}
-	else
-	{
-		cout << "berhasil 1" << endl;
-	}
 	
 
 	glBindProgramPipeline(progPipeline);
@@ -137,10 +175,6 @@ void ParticleSystem::loadShaders()
 		printf("Shader pipeline not valid:\n%s\n", log);
 		delete[] log;
 	}
-	else
-	{
-		cout << "berhasil 2" << endl;
-	}
 
 	updateProg = ProgramID;
 	//glBindProgramPipeline(progPipeline);
@@ -151,17 +185,15 @@ void ParticleSystem::loadShaders()
 
 void ParticleSystem::initialize()
 {
-	vec4f *position = pos->map();
+	Particle *particle = particles->map();
 	for (size_t i = 0; i<size; i++) {
-		position[i].x = sfrand()*scaletowindow;
-		position[i].y = sfrand()*scaletowindow;
-		position[i].z = 0.0;
-		position[i].w = 1.0;
-		//cout << position[i].x << endl;
+		particle[i].x = sfrand()*scaletowindow;
+		particle[i].y = sfrand()*scaletowindow;
+		//cout << particle[i].x << endl;
 	}
-	pos->unmap();
+	particles->unmap();
 
-	vec4f *velocity = vel->map();
+	/*vec4f *velocity = vel->map();
 	for (size_t i = 0; i<size; i++) {
 		velocity[i].x = 0.0;
 		velocity[i].y = 0.0;
@@ -170,6 +202,12 @@ void ParticleSystem::initialize()
 	}
 	vel->unmap();
 	//scaletowindow += 0.001;
+
+	float *weight = gridWeight->map();
+	for (size_t i = 0; i<size; i++) {
+		weight[i] = 0.0f;
+	}
+	gridWeight->unmap();*/
 }
 
 void ParticleSystem::update()
@@ -179,8 +217,8 @@ void ParticleSystem::update()
 
 	glActiveTexture(GL_TEXTURE0);
 
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, pos->getBuffer());
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, vel->getBuffer());
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, particles->getBuffer());
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, nodes->getBuffer());
 	
 	glDispatchCompute(256, 1, 1);
 

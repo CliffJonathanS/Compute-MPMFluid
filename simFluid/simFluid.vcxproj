@@ -118,6 +118,7 @@
     <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ShaderBuffer.h" />
+    <ClInclude Include="uniforms.h" />
     <ClInclude Include="vec4f.h" />
   </ItemGroup>
   <ItemGroup>

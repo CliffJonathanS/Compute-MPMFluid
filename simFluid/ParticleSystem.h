@@ -27,12 +27,11 @@ public:
 	ParticleSystem(size_t size);
 	~ParticleSystem();
 
+	void loadComputeShader(std::string filename, GLuint *ProgramID, GLuint *PipelineID);
 	void loadShaders(void);
 	void initialize(void);
 	void update(void);
 
-	ShaderBuffer<vec4f> *getPosBuffer() { return pos; }
-	ShaderBuffer<vec4f> *getVelBuffer() { return vel; }
 	ShaderBuffer<uint32_t> *getIndexBuffer() { return index; }
 	ShaderBuffer<Particle> *getParticlesBuffer() { return particles; }
 	ShaderBuffer<Node> *getNodesBuffer() { return nodes; }
@@ -41,9 +40,6 @@ public:
 private:
 	size_t size;
 
-	ShaderBuffer<vec4f> *pos;
-	ShaderBuffer<vec4f> *vel;
-	ShaderBuffer<float> *gridWeight;
 	ShaderBuffer<uint32_t> *index;
 	ShaderBuffer<uint32_t> *gridIndex;
 
@@ -51,8 +47,22 @@ private:
 	ShaderBuffer<Particle> *particles;
 
 	GLuint updateProg;
-	GLuint progPipeline;
-	GLuint ProgramID;
+
+	GLuint PipelinePass1;
+	GLuint PipelineNode1;
+	GLuint PipelinePass2;
+	GLuint PipelineNode2;
+	GLuint PipelinePass3;
+	GLuint PipelineNode3;
+	GLuint PipelinePass4;
+
+	GLuint ProgramPass1;
+	GLuint ProgramNode1;
+	GLuint ProgramPass2;
+	GLuint ProgramNode2;
+	GLuint ProgramPass3;
+	GLuint ProgramNode3;
+	GLuint ProgramPass4;
 
 	float scaletowindow;
 };

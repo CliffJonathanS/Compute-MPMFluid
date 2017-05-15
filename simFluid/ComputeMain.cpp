@@ -175,22 +175,27 @@ void ComputeMain::update(void)
 	glActiveTexture(GL_TEXTURE0);
 	
 	particles->update();
+	
+	/*
 	glLineWidth(1);
 	glColor3f(0.5, 0.0, 0.0);
-	float gridSize = 0.05f;
-	int gridNum = 2 / gridSize;
-	for (int i = 0; i < gridNum; i++) {
+	for (int i = 0; i < GRIDX; i++) {
+		float gridSize = 2.0f / GRIDX;
+		//cout << gridSize << endl;
 		glBegin(GL_LINES);
 		glVertex3f(i*gridSize - 1, -1.0, 0.0);
 		glVertex3f(i*gridSize - 1, 1.0, 0.0);
 		glEnd();
 	}
-	for (int i = 0; i < gridNum; i++) {
+	for (int i = 0; i < GRIDY; i++) {
+		float gridSize = 2.0f / GRIDY;
 		glBegin(GL_LINES);
 		glVertex3f(-1.0, i*gridSize - 1, 0.0);
 		glVertex3f(1.0, i*gridSize - 1, 0.0);
 		glEnd();
 	}
+	*/
+
 	glUseProgram(program);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);  // additive blend
@@ -208,7 +213,7 @@ void ComputeMain::update(void)
 
 
 	glPointSize(2.0f);
-	glDrawElements(GL_POINTS, GLsizei(particles->getSize())*6, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_POINTS, GLsizei(particles->getSize()), GL_UNSIGNED_INT, 0);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0);
@@ -254,7 +259,7 @@ void ComputeMain::initRendering(void)
 	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vtx_data), vtx_data, GL_STATIC_DRAW);
 
-	particles = new ParticleSystem(1000);
+	particles = new ParticleSystem(NPARTICLES);
 
 	int cx, cy, cz;
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &cx);

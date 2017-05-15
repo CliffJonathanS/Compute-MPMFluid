@@ -50,13 +50,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
-    <None Include="compute.glsl">
-      <Filter>Shader Files</Filter>
-    </None>
     <None Include="vertex.glsl">
       <Filter>Shader Files</Filter>
     </None>
     <None Include="fragment.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="computepass1.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="computepass2.glsl">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>

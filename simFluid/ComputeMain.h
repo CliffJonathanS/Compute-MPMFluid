@@ -1,5 +1,6 @@
 #ifndef COMPUTE_MAIN_H
 #define COMPUTE_MAIN_H
+
 // Include OpenGL dependencies
 #include "Dependencies\glew\glew.h"
 #include "Dependencies\freeglut\freeglut.h"

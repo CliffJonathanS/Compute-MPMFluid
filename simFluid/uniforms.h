@@ -45,3 +45,8 @@ struct Particle
 	float gx[3];
 	float gy[3];
 };
+
+#define GRIDX 160
+#define GRIDY 120
+#define COMPUTESIZE 512
+#define NPARTICLES 1000
